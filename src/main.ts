@@ -3,7 +3,7 @@ import * as os from "os";
 import { spawn, exec } from "child_process";
 import { OpenFilePlgSettingTab } from "./components/OpenFilePlgSettingTab";
 
-type EditorName = "gvim" | "code" | "nvim-qt";
+type EditorName = "gvim" | "code" | "nvim-qt" | "nvim" | "neovide";
 type AdapterPlus = Partial<DataAdapter> & {
 	path: any;
 	basePath: any;
@@ -55,12 +55,14 @@ function handleArguments(
 type SettingConfig = {
 	vscode_path: string;
 	gvim_path: string;
+	neovide_path: string;
 };
 
 export default class OpenFilePlg extends Plugin {
 	settingConfig: SettingConfig = {
 		vscode_path: "",
 		gvim_path: "",
+		neovide_path: "",
 	};
 
 	async doLoadSettingConfig() {
@@ -93,9 +95,25 @@ export default class OpenFilePlg extends Plugin {
 
 		this.addCommand({
 			id: "open-in-other-editor-nvim-qt",
-			name: "Open current active file in nvim",
+			name: "Open current active file in nvim qt",
 			callback: () => {
 				this.open("nvim-qt");
+			},
+		});
+
+		this.addCommand({
+			id: "open-in-other-editor-nvim",
+			name: "Open current active file in nvim",
+			callback: () => {
+				this.open("nvim");
+			},
+		});
+
+		this.addCommand({
+			id: "open-in-other-editor-neovide",
+			name: "Open current active file in neovide",
+			callback: () => {
+				this.open("neovide");
 			},
 		});
 
@@ -118,7 +136,9 @@ export default class OpenFilePlg extends Plugin {
 			const file = {
 				code: this.settingConfig.vscode_path,
 				gvim: this.settingConfig.gvim_path,
+				neovide: this.settingConfig.neovide_path,
 			};
+			// @ts-ignore
 			return this.macopen(basePath, curFilePath, file[by]);
 		} else if (os.type() === "Windows_NT") {
 			runCMD(`cd /d "${basePath}" && ${by} "./${curFilePath}"`);
